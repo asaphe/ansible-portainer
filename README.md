@@ -3,6 +3,8 @@ This role is designed to deploy Portainer version 1.19 onto a Docker Swarm Clust
 The stack has two type of containers, a *Manager* container and an *Agent* container.
 The manager uses the agent to perform API calls to the Docker daemon where the agent is running.
 
+* OS: Ubuntu 16.04+
+
 ### Requirements
 - Docker Swarm
 - Docker Engine API
