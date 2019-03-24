@@ -1,0 +1,16 @@
+---
+  - block:
+      - name: Remove existing portainer stack
+        import_tasks: remove-stack.yml
+        when: remove_stack|default(false)
+        tags: [docker.swarm.portainer.remove]
+
+      - name: Deploy portainer stack
+        import_tasks: deploy-stack.yml
+        when: not skip_deploy|default(false)
+        tags: [docker.swarm.portainer.deploy]
+
+      - name: Configure portainer
+        import_tasks: configure-portainer.yml
+        when: not skip_configure|default(false)
+        tags: [docker.swarm.portainer.configure]

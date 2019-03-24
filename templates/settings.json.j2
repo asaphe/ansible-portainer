@@ -1,0 +1,36 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+{
+  "TemplatesURL": "{{ portainer_config.templates_url }}",
+  "LogoURL": "{{ portainer_config.company_logo_url }}",
+  "DisplayDonationHeader": false,
+  "DisplayExternalContributors": false,
+  "AuthenticationMethod": {{ portainer_config.auth_method }},
+  {% if portainer_config.auth_method == 2 %}
+  "LDAPSettings": {
+    "ReaderDN": "{{ portainer_sso.ldap_reader_dn }}",
+    "Password": "{{ portainer_sso.ldap_reader_password }}",
+    "URL": "{{ portainer_sso.ldap_url }}:{{ portainer_sso.ldap_port }}",
+    "TLSConfig": {
+      "TLS": {{ portainer_sso.tls_enabled }},
+      "TLSSkipVerify": {{ portainer_sso.tls_skipverify }}
+    },
+    "StartTLS": {{ portainer_sso.start_tls }},
+    "SearchSettings": [
+      {
+        "BaseDN": "{{ portainer_sso.ldap_base_dn }}",
+        "Filter": "{{ portainer_sso.ldap_filter }}",
+        "UserNameAttribute": "{{ portainer_sso.ldap_username_attribute }}"
+      }
+    ]{% if portainer_sso.ldap_base_dn_groups is defined %},
+    "GroupSearchSettings": [
+      {
+        "GroupBaseDN": "{{ portainer_sso.ldap_groups_base_dn }}",
+        "GroupFilter": "{{ portainer_sso.ldap_groups_filter }}",
+        "GroupAttribute": "{{ portainer_sso.ldap_groups_attribute }}",
+      }
+    ]{% endif %}
+  },
+  {% endif %}
+  "AllowBindMountsForRegularUsers": {{ portainer_config.allow_bindmounts_users }},
+  "AllowPrivilegedModeForRegularUsers": {{ portainer_config.allow_privileged_users }}
+}

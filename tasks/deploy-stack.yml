@@ -1,0 +1,30 @@
+---
+  - block:
+    - name: Create the persistent data directory
+      file:
+        state: directory
+        path: "{{ portainer.volume_path }}"
+        owner: "{{ ansible_user }}"
+      when: create_data_directory|default(false)
+
+    - name: Template stack file
+      template:
+        src: portainer-agent-stack.yml.j2
+        dest: portainer-agent-stack.yml
+        owner: "{{ ansible_user }}"
+        force: yes
+        lstrip_blocks: yes
+        trim_blocks: no
+      register: result
+
+    - debug:
+        msg:
+          - "Stack File: {{ result.dest }}"
+          - "Stack Name: {{ portainer.stack_name }}"
+
+    #- meta: end_play
+
+    - name: "Run docker deploy stack {{ portainer.stack_name }}"
+      command: "docker stack deploy --prune --compose-file {{ result.dest }} {{ portainer.stack_name }}"
+
+    become: true

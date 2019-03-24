@@ -1,0 +1,13 @@
+---
+  - block:
+    - name: "Remove the contents of the persistent data folder {{ portainer.volume_path }}"
+      file:
+        state: absent
+        path: "{{ portainer.volume_path }}/"
+      when: not skip_rm_persistent_data|default(true)
+
+    - name: "Run docker stack rm {{ portainer.stack_name }}"
+      command: >
+            docker stack rm {{ portainer.stack_name }}
+
+    become: true
