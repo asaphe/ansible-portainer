@@ -1,0 +1,33 @@
+---
+# Portainer requires the docker API to be enabled and reachable (Configure /lib/systemd/system/docker.service with ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
+
+portainer:
+  version: 'latest'
+  stack_name: portainer
+  volume_path: /mnt/portainer_data
+  agent_port: 9091
+  manager_port: 9090
+  admin_user: "{{ lookup('pipe', 'credstash -t ' + credstash_devops_table + ' -p ' + credstash_aws_profile + ' get portainer_admin_username') | mandatory }}"
+  admin_password: "{{ lookup('pipe', 'credstash -t ' + credstash_devops_table + ' -p ' + credstash_aws_profile + ' get portainer_admin_password') | mandatory }}"
+
+portainer_config:
+  templates_url: 'https://raw.githubusercontent.com/portainer/templates/master/templates.json'
+  company_logo_url: 'https://domain.com/wp-content/themes/getvim/img/vim-banner.png'
+  allow_bindmounts_users: true
+  allow_privileged_users: true
+  auth_method: 2                # auth_method | use LDAP or standalone [2 for ldap, 1 for standalone]
+
+portainer_sso:
+  ldap_base_dn: 'ou=users,dc=vim,dc=onelogin,dc=com'
+  ldap_filter: '(objectClass=inetOrgPerson)'
+  ldap_username_attribute: 'username'
+  ldap_groups_base_dn:
+  ldap_groups_filter:
+  ldap_groups_attribute:
+  ldap_reader_dn: "{{ lookup('pipe', 'credstash -t ' + credstash_devops_table + ' -p ' + credstash_aws_profile + ' get onelogin_ldap_reader_dn') | mandatory }}"
+  ldap_reader_password: "{{ lookup('pipe', 'credstash -t ' + credstash_devops_table + ' -p ' + credstash_aws_profile + ' get onelogin_ldap_reader_password') | mandatory }}"
+  ldap_url: '52.34.255.224'    # 'ldap.us.onelogin.com' resolves to three different IPs; due to DNS issues from Portainer (host can resolve) one of those IPs was actually configured
+  ldap_port: 389
+  tls_enabled: false
+  tls_skipverify: false
+  start_tls: false

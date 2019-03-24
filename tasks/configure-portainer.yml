@@ -1,0 +1,80 @@
+---
+  - block:
+    - name: Set api_endpoint variable
+      set_fact:
+        api_endpoint: "http://{{ ansible_host }}:{{ portainer.manager_port }}/api"
+
+    - name: Wait for container
+      wait_for:
+        port: "{{ portainer.manager_port }}"
+        host: "{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}"
+        delay: 0
+        sleep: 5
+        timeout: 60
+
+    - name: Check if an Adminstator account has been created
+      uri:
+        url: "{{ api_endpoint }}/users/admin/check"
+        method: GET
+        return_content: yes
+        status_code: [200, 204, 404]
+      register: admin_check
+
+    - name: Configure admin user password
+      uri:
+        url: "{{ api_endpoint }}/users/admin/init"
+        method: POST
+        return_content: yes
+        body_format: json
+        body: {"Username": "{{ portainer.admin_user }}", "Password": "{{ portainer.admin_password }}"}
+      when: admin_check.status not in [200,204]
+
+    - name: Generate authentication token
+      uri:
+        url: "{{ api_endpoint }}/auth"
+        method: POST
+        return_content: yes
+        body_format: json
+        body: {"Username":"{{ portainer.admin_user }}", "Password":"{{ portainer.admin_password }}"}
+        timeout: 65
+      register: auth_token
+
+    tags: [docker.swarm.portainer.configure.admin]
+
+  - block:
+    - name: Define Endpoints
+      uri:
+        url: "{{ api_endpoint }}/endpoints"
+        method: POST
+        return_content: yes
+        headers:
+          Authorization: "{{ (auth_token.content|from_json).jwt }}"
+        body: {"Name":"{{ item.name }}", "URL":"{{ item.url }}"}
+        body_format: json
+      with_items:
+        - "{{ endpoints | list | default(omit) }}"
+      when: not skip_endpoints|default(true)
+      tags: [docker.swarm.portainer.configure.settings.endpoints]
+
+    - name: Configure Portainer settings
+      uri:
+        url: "{{ api_endpoint }}/settings"
+        method: PUT
+        return_content: yes
+        headers:
+          Authorization: "{{ (auth_token.content|from_json).jwt }}"
+        body_format: json
+        body: "{{ lookup('template','settings.json.j2') }}"
+      tags: [docker.swarm.portainer.configure.settings]
+
+    - name: Configure Registry
+      uri:
+        url: "{{ api_endpoint }}/registries"
+        method: POST
+        return_content: yes
+        headers:
+          Authorization: "{{ (auth_token.content|from_json).jwt }}"
+        body_format: json
+        body: "{{ lookup('template','registry.json.j2') }}"
+      when: registry is defined
+      tags: [docker.swarm.portainer.configure.registry]
