@@ -31,18 +31,20 @@ A combination of control variables and other variables is designed to lend flexi
  
 **Mandatory**  
 
-|Type  |Name             |Default Value |Description                                           |
-|:----:|:---------------:|:------------:|:--------------------------------------------------- :|
-|dict  |portainer        |N/A           | A dictionary containing container settings used in the role and in the Docker-Stack template |
-|dict  |portainer_config |N/A           | A dictionary containing Portainer settings used to template the JSON |
+|Type|Name|Default Value|Description|
+|:-:|:-:|:-:|:-:|
+|dict|portainer|N/A|A dictionary containing container settings used in the role and in the Docker-Stack template|
+|dict|portainer_config|N/A|A dictionary containing Portainer settings used to template the JSON|
 
 **Optional**  
 
-|Type  |Name             |Default Value |Description                                           |
-|:----:|:---------------:|:------------:|:--------------------------------------------------- :|
-|dict  |portainer_sso    |N/A           | A dictionary containing settings required for enabling SSO via LDAP |
-|dict  |registry         |N/A           | A dictionary containing settings for a registry to be defined in Portainer |
-|list  |endpoints        |N/A           | A list of **dictionaries** which is later flattened and used to define additional endpoints via the API|
+
+|Type|Name|Default Value|Description|
+|:-:|:-:|:-:|:-:|
+|dict  |portainer_sso    |N/A           |A dictionary containing settings required for enabling SSO via LDAP|
+|dict  |registry         |N/A           |A dictionary containing settings for a registry to be defined in Portainer|
+|list  |endpoints        |N/A           |A list of **dictionaries** which is later flattened and used to define additional endpoints via the API|
+
 
 >**Endpoints list example**  
 ```yaml
